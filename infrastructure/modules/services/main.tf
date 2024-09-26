@@ -59,19 +59,8 @@ resource "aws_security_group" "ecs_sg" {
 
 ## app1
 
-resource "aws_lb_listener" "alb_listener_app1" {
-  load_balancer_arn = var.alb_arn
-  port              = 8080
-  protocol          = "HTTP"
-
-  default_action {
-    type             = "forward"
-    target_group_arn = aws_lb_target_group.aws_lb_tg_app1.arn
-  }
-}
-
-resource "aws_lb_target_group" "aws_lb_tg_app1" {
-  name     = "ecsimsw-dev-app1-tg"
+resource "aws_lb_target_group" "alb_listener_app1" {
+  name     = "ecsimsw-dev-app1-tg-${substr(uuid(), 0, 5)}"
   port     = 8080
   protocol = "HTTP"
   vpc_id   = var.vpc_id
@@ -85,6 +74,25 @@ resource "aws_lb_target_group" "aws_lb_tg_app1" {
     unhealthy_threshold = 2
     matcher             = "200"
   }
+
+  lifecycle {
+    ignore_changes        = [name]
+  }
+}
+
+resource "aws_lb_listener" "alb_listener_app1" {
+  load_balancer_arn = var.alb_arn
+  port              = 8080
+  protocol          = "HTTP"
+
+  default_action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.alb_listener_app1.arn
+  }
+
+  depends_on = [
+    aws_lb_listener.alb_listener_app1
+  ]
 }
 
 resource "aws_ecs_task_definition" "ecs_task_app1" {
@@ -109,14 +117,6 @@ resource "aws_ecs_task_definition" "ecs_task_app1" {
           protocol      = "tcp"
         }
       ]
-      logConfiguration: {
-        "logDriver": "awslogs",
-        "options": {
-          "awslogs-group": "/ecs/app1"
-          "awslogs-region": "ap-northeast-2"
-          "awslogs-stream-prefix": "ecs"
-        }
-      }
     }
   ])
 
@@ -139,8 +139,10 @@ resource "aws_ecs_service" "ecs_service_app1" {
     assign_public_ip = false
   }
 
+  force_new_deployment = true
+
   load_balancer {
-    target_group_arn = aws_lb_target_group.aws_lb_tg_app1.arn
+    target_group_arn = aws_lb_target_group.alb_listener_app1.arn
     container_name   = "ecsimsw-plaform-dev-app1"
     container_port   = 8080
   }
