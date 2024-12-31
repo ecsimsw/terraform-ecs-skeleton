@@ -1,4 +1,4 @@
-## Terraform / Spring boot / ECS
+## Terraform / ECS
 - AWS ECS IaC를 위한 Terraform 뼈대 코드
 
 ### Modules
@@ -20,3 +20,5 @@
    - sqs
 
 ### Diagram
+
+<img width="950" alt="image" src="https://github.com/user-attachments/assets/8981e6d0-c907-4daa-a98c-162c35296e42" />
