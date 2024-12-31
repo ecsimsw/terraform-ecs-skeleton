@@ -1,6 +1,0 @@
-rootProject.name = 'spring-ecs-starter'
-include 'module-a'
-include 'module-b'
-
-project(':module-a').projectDir = file('module-a')
-project(':module-b').projectDir = file('module-b')

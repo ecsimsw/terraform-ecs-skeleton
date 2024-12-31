@@ -1,16 +1,22 @@
-# Spring boot, AWS ECS starter
+## Terraform / Spring boot / ECS
+- AWS ECS IaC를 위한 Terraform 뼈대 코드
 
-### Terraform
-- VPC, Subnets
-- ALB
-- ECS + Fargate
-- ECR
-- CloudWatch log stream
+### Modules
+- vpc
+   - internet gateway
+   - NAT gateway
+   - public subnet, private subnet
+   - route table
+- service
+   - ecs cluster, service, task
+   - auto scale policy
+   - cloud watch, log stream
+   - container repository
+- lb
+   - application load balancer
+   - security group
+- events
+   - sns
+   - sqs
 
-### Application development env
-- Java 17
-- Spring boot 3.3.3
-- JPA / Hibernate
-- Gradle 8.10
-- H2
-- Gradle multi module 
+### Diagram
