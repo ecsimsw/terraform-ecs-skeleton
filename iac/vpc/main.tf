@@ -41,13 +41,13 @@ resource "aws_subnet" "subnet_public_2c" {
 
 resource "aws_subnet" "subnet_private_2a" {
   vpc_id                  = aws_vpc.vpc_main.id
-  cidr_block              = "10.1.32.0/20"   # /20이면 약 4096개!
+  cidr_block              = "10.1.32.0/20"
   availability_zone       = "ap-northeast-2a"
 }
 
 resource "aws_subnet" "subnet_private_2c" {
   vpc_id                  = aws_vpc.vpc_main.id
-  cidr_block              = "10.1.48.0/20"   # /20이면 약 4096개!
+  cidr_block              = "10.1.48.0/20"
   availability_zone       = "ap-northeast-2c"
 }
 
