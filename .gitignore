@@ -156,3 +156,24 @@ override.tf.json
 # Ignore CLI configuration files
 .terraformrc
 terraform.rc
+
+# Terraform state
+terraform.tfstate
+terraform.tfstate.*
+crash.log
+
+# Terraform local dirs/plugins
+.terraform/
+.terraform.*
+
+# Optional: Provider lock (대형 프로젝트는 커밋하기도)
+.terraform.lock.hcl
+
+# Optional: 주로 개인정보
+*.tfvars
+*.tfvars.json
+
+# Editor/OS noise
+*.swp
+*.swo
+.DS_Store
