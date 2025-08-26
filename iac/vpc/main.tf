@@ -1,4 +1,3 @@
-# VPC
 resource "aws_vpc" "vpc_main" {
   cidr_block = "10.1.0.0/16"
   tags = {
@@ -6,12 +5,10 @@ resource "aws_vpc" "vpc_main" {
   }
 }
 
-# IGW
 resource "aws_internet_gateway" "vpc_igw_main" {
   vpc_id = aws_vpc.vpc_main.id
 }
 
-# NAT
 resource "aws_eip" "nat_ip_main" {
   domain = "vpc"
   tags = {
@@ -24,7 +21,6 @@ resource "aws_nat_gateway" "nat_main" {
   subnet_id     = aws_subnet.subnet_public_2a.id
 }
 
-# SUBNETS
 resource "aws_subnet" "subnet_public_2a" {
   vpc_id                  = aws_vpc.vpc_main.id
   cidr_block              = "10.1.1.0/24"

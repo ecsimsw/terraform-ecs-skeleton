@@ -18,9 +18,29 @@ provider "aws" {
 }
 
 module "vpc" {
-  source = "vpc"
+  source = "./vpc"
 }
 
 module "ecr" {
-  source = "ecr"
+  source = "./ecr"
+}
+
+module "ecs" {
+  source                  = "./ecs"
+  internal_alb_sg_id      = module.lb.internal_alb_sg_id
+  vpc_id                  = module.vpc.vpc_id
+  alb_listener_arn        = module.lb.internal_alb_listener_arn
+  private_subnet_ids      = module.vpc.private_subnet_ids
+  cluster_id              = module.ecs.cluster_id
+  ecr_url                 = module.ecr.ecr_url
+  ecs_security_group_id   = module.ecs.ecs_security_group_id
+  ecs_task_execution_role = module.ecs.ecs_task_execution_role
+}
+
+module "lb" {
+  source             = "./lb"
+  vpc_id             = module.vpc.vpc_id
+  public_subnet_ids  = module.vpc.public_subnet_ids
+  private_subnet_ids = module.vpc.private_subnet_ids
+  internal_lb_cidr_block = ["0.0.0.0/0"]
 }
