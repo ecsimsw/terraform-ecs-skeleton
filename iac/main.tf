@@ -29,6 +29,7 @@ module "ecs" {
   source                  = "./ecs"
   internal_alb_sg_id      = module.lb.internal_alb_sg_id
   vpc_id                  = module.vpc.vpc_id
+  alb_tg_7002_arn         = module.lb.internal_alb_tg_7002_arn
   alb_tg_7004_arn         = module.lb.internal_alb_tg_7004_arn
   alb_tg_7005_arn         = module.lb.internal_alb_tg_7005_arn
   alb_tg_7013_arn         = module.lb.internal_alb_tg_7013_arn

@@ -26,6 +26,10 @@ variable "ecs_security_group_id" {
   type = string
 }
 
+variable "alb_tg_7002_arn" {
+  type = string
+}
+
 variable "alb_tg_7004_arn" {
   type = string
 }

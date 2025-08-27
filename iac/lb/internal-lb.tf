@@ -3,6 +3,13 @@ resource "aws_security_group" "internal_alb_sg" {
   vpc_id      = var.vpc_id
 
   ingress {
+    from_port   = 7002
+    to_port     = 7002
+    protocol    = "tcp"
+    cidr_blocks = var.internal_lb_cidr_block
+  }
+
+  ingress {
     from_port   = 7004
     to_port     = 7004
     protocol    = "tcp"
@@ -45,6 +52,39 @@ resource "aws_lb" "internal_alb" {
   security_groups    = [aws_security_group.internal_alb_sg.id]
   subnets            = var.private_subnet_ids
   idle_timeout       = 3600
+}
+
+## 7002
+
+resource "aws_lb_target_group" "alb_tg_7002" {
+  name        = "cloud-7002-${substr(uuid(), 0, 3)}"
+  port        = 7002
+  protocol    = "HTTP"
+  vpc_id      = var.vpc_id
+  target_type = "ip"
+
+  health_check {
+    path                = "/genie/actuator/health"
+    interval            = 30
+    timeout             = 10
+    healthy_threshold   = 2
+    unhealthy_threshold = 2
+    matcher             = "200"
+  }
+
+  lifecycle {
+    ignore_changes = [name]
+  }
+}
+
+resource "aws_lb_listener" "internal_alb_listener_7002" {
+  load_balancer_arn = aws_lb.internal_alb.arn
+  port              = 7002
+  protocol          = "HTTP"
+  default_action {
+    type = "forward"
+    target_group_arn = aws_lb_target_group.alb_tg_7002.arn
+  }
 }
 
 ## 7004
