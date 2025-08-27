@@ -14,6 +14,10 @@ output "internal_alb_listener_8080_arn" {
   value = aws_lb_listener.internal_alb_listener_8080.arn
 }
 
+output "internal_alb_tg_7005_arn" {
+  value = aws_lb_target_group.alb_tg_clova.arn
+}
+
 output "internal_alb_tg_7013_arn" {
   value = aws_lb_target_group.alb_tg_eureka.arn
 }
