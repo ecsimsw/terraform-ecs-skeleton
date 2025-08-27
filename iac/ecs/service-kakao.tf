@@ -1,14 +1,14 @@
 # LOG_GROUP
 
-resource "aws_cloudwatch_log_group" "log_group_clova" {
-  name              = "/cloud/clova-svc"
+resource "aws_cloudwatch_log_group" "log_group_kakao" {
+  name              = "/cloud/kakao-svc"
   retention_in_days = 1
 }
 
 # ECS_TASK
 
-resource "aws_ecs_task_definition" "ecs_task_clova" {
-  family             = "task-clova"
+resource "aws_ecs_task_definition" "ecs_task_kakao" {
+  family             = "task-kakao"
   execution_role_arn = var.ecs_task_execution_role
   network_mode       = "awsvpc"
   requires_compatibilities = ["FARGATE"]
@@ -17,15 +17,15 @@ resource "aws_ecs_task_definition" "ecs_task_clova" {
 
   container_definitions = jsonencode([
     {
-      name   = "cloud-clova-svc"
-      image  = "${var.ecr_url}:goqual-clova-latest"
+      name   = "cloud-kakao-svc"
+      image  = "${var.ecr_url}:goqual-kakao-latest"
       cpu    = 512
       memory = 1024
       essential = true # If the essential parameter of a container is marked as true, and that container fails or stops for any reason, all other containers that are part of the task are stopped
       portMappings = [
         {
-          containerPort = 7005
-          hostPort      = 7005
+          containerPort = 7004
+          hostPort      = 7004
           protocol      = "tcp"
         }
       ]
@@ -33,16 +33,16 @@ resource "aws_ecs_task_definition" "ecs_task_clova" {
       logConfiguration = {
         logDriver = "awslogs"
         options = {
-          awslogs-group         = aws_cloudwatch_log_group.log_group_clova.name
+          awslogs-group         = aws_cloudwatch_log_group.log_group_kakao.name
           awslogs-region        = "ap-northeast-2"
-          awslogs-stream-prefix = "clova"
+          awslogs-stream-prefix = "kakao"
         }
       }
 
       environment = [
         {
           name  = "SPRING_PROFILES_ACTIVE"
-          value = "prod,remote-db,fusion"
+          value = "prod,remote-db,remote-redis"
         }
       ]
     }
@@ -56,13 +56,13 @@ resource "aws_ecs_task_definition" "ecs_task_clova" {
 
 # ECS_SG
 
-resource "aws_security_group" "ecs_clova_sg" {
-  name   = "sp-ecs-clova-sg"
+resource "aws_security_group" "ecs_kakao_sg" {
+  name   = "sp-ecs-kakao-sg"
   vpc_id = var.vpc_id
 
   ingress {
-    from_port       = 7005
-    to_port         = 7005
+    from_port       = 7004
+    to_port         = 7004
     protocol        = "tcp"
     security_groups = [var.internal_alb_sg_id]
   }
@@ -77,10 +77,10 @@ resource "aws_security_group" "ecs_clova_sg" {
 
 # ECS_SERVICE
 
-resource "aws_ecs_service" "ecs_service_clova" {
-  name            = "cloud-clova"
+resource "aws_ecs_service" "ecs_service_kakao" {
+  name            = "cloud-kakao"
   cluster         = var.cluster_id
-  task_definition = aws_ecs_task_definition.ecs_task_clova.arn
+  task_definition = aws_ecs_task_definition.ecs_task_kakao.arn
   desired_count   = 1
   launch_type     = null
   health_check_grace_period_seconds = 120
@@ -90,7 +90,7 @@ resource "aws_ecs_service" "ecs_service_clova" {
     subnets          = var.private_subnet_ids
     security_groups = [
       var.ecs_security_group_id,
-      aws_security_group.ecs_clova_sg.id
+      aws_security_group.ecs_kakao_sg.id
     ]
     assign_public_ip = false
   }
@@ -102,12 +102,12 @@ resource "aws_ecs_service" "ecs_service_clova" {
   }
 
   load_balancer {
-    target_group_arn = var.alb_tg_7005_arn
-    container_name   = "cloud-clova-svc"  # make sure that set same as container name
-    container_port   = 7005
+    target_group_arn = var.alb_tg_7004_arn
+    container_name   = "cloud-kakao-svc"  # make sure that set same as container name
+    container_port   = 7004
   }
 
   depends_on = [
-    var.alb_tg_7005_arn
+    var.alb_tg_7004_arn
   ]
 }

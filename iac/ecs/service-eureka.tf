@@ -108,6 +108,6 @@ resource "aws_ecs_service" "ecs_service_eureka" {
   }
 
   depends_on = [
-    var.alb_listener_7013_arn
+    var.alb_tg_7013_arn
   ]
 }
