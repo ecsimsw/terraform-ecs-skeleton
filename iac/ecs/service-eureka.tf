@@ -12,15 +12,15 @@ resource "aws_ecs_task_definition" "ecs_task_eureka" {
   execution_role_arn = var.ecs_task_execution_role
   network_mode       = "awsvpc"
   requires_compatibilities = ["FARGATE"]
-  cpu                = 256
-  memory             = 512
+  cpu                = 512
+  memory             = 1024
 
   container_definitions = jsonencode([
     {
       name   = "cloud-eureka-svc"
       image  = "${var.ecr_url}:goqual-eureka-latest"
-      cpu    = 256
-      memory = 128
+      cpu    = 512
+      memory = 1024
       essential = true # If the essential parameter of a container is marked as true, and that container fails or stops for any reason, all other containers that are part of the task are stopped
       portMappings = [
         {

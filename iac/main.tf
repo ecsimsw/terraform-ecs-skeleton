@@ -47,3 +47,9 @@ module "lb" {
   private_subnet_ids = module.vpc.private_subnet_ids
   internal_lb_cidr_block = ["0.0.0.0/0"]
 }
+
+module "ec2" {
+  source             = "./ec2"
+  vpc_id             = module.vpc.vpc_id
+  subnet             = module.vpc.public_subnet_ids[0]
+}
