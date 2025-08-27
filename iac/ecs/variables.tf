@@ -26,6 +26,18 @@ variable "ecs_security_group_id" {
   type = string
 }
 
-variable "alb_listener_arn" {
+variable "alb_tg_8080_arn" {
+  type = string
+}
+
+variable "alb_tg_7013_arn" {
+  type = string
+}
+
+variable "alb_listener_8080_arn" {
+  type = string
+}
+
+variable "alb_listener_7013_arn" {
   type = string
 }

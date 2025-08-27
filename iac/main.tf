@@ -29,7 +29,10 @@ module "ecs" {
   source                  = "./ecs"
   internal_alb_sg_id      = module.lb.internal_alb_sg_id
   vpc_id                  = module.vpc.vpc_id
-  alb_listener_arn        = module.lb.internal_alb_listener_arn
+  alb_listener_7013_arn   = module.lb.internal_alb_listener_7013_arn
+  alb_listener_8080_arn   = module.lb.internal_alb_listener_8080_arn
+  alb_tg_7013_arn         = module.lb.internal_alb_tg_7013_arn
+  alb_tg_8080_arn         = module.lb.internal_alb_tg_8080_arn
   private_subnet_ids      = module.vpc.private_subnet_ids
   cluster_id              = module.ecs.cluster_id
   ecr_url                 = module.ecr.ecr_url
