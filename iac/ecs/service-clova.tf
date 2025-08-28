@@ -1,14 +1,15 @@
-# LOG_GROUP
-
-resource "aws_cloudwatch_log_group" "log_group_clova" {
-  name              = "/cloud/clova-svc"
-  retention_in_days = 1
+locals {
+  clova_service_name = "goqual-clova"
+  clova_service_version = "1.16.1"
+  clova_service_profile = "prod,remote-db,remote-redis"
+  clova_container_port = 7004
+  clova_lb_target_arn = var.alb_tg_7004_arn
 }
 
 # ECS_TASK
 
 resource "aws_ecs_task_definition" "ecs_task_clova" {
-  family             = "task-clova"
+  family             = "task-${local.clova_service_name}"
   execution_role_arn = var.ecs_task_execution_role
   network_mode       = "awsvpc"
   requires_compatibilities = ["FARGATE"]
@@ -17,15 +18,15 @@ resource "aws_ecs_task_definition" "ecs_task_clova" {
 
   container_definitions = jsonencode([
     {
-      name   = "cloud-clova-svc"
-      image  = "${var.ecr_url}:goqual-clova-latest"
+      name   = local.clova_service_name
+      image  = "${var.ecr_url}:${local.clova_service_name}-${local.clova_service_version}"
       cpu    = 512
       memory = 1024
       essential = true # If the essential parameter of a container is marked as true, and that container fails or stops for any reason, all other containers that are part of the task are stopped
       portMappings = [
         {
-          containerPort = 7005
-          hostPort      = 7005
+          containerPort = local.clova_container_port
+          hostPort      = local.clova_container_port
           protocol      = "tcp"
         }
       ]
@@ -35,14 +36,14 @@ resource "aws_ecs_task_definition" "ecs_task_clova" {
         options = {
           awslogs-group         = aws_cloudwatch_log_group.log_group_clova.name
           awslogs-region        = "ap-northeast-2"
-          awslogs-stream-prefix = "clova"
+          awslogs-stream-prefix = "${local.clova_service_name}-${local.clova_service_version}"
         }
       }
 
       environment = [
         {
           name  = "SPRING_PROFILES_ACTIVE"
-          value = "prod,remote-db,fusion"
+          value = local.clova_service_profile
         }
       ]
     }
@@ -54,15 +55,22 @@ resource "aws_ecs_task_definition" "ecs_task_clova" {
   }
 }
 
+# LOG_GROUP
+
+resource "aws_cloudwatch_log_group" "log_group_clova" {
+  name              = "/cloud/${local.clova_service_name}"
+  retention_in_days = 1
+}
+
 # ECS_SG
 
 resource "aws_security_group" "ecs_clova_sg" {
-  name   = "sp-ecs-clova-sg"
+  name   = "sp-ecs-${local.clova_service_name}-sg"
   vpc_id = var.vpc_id
 
   ingress {
-    from_port       = 7005
-    to_port         = 7005
+    from_port       = local.clova_container_port
+    to_port         = local.clova_container_port
     protocol        = "tcp"
     security_groups = [var.internal_alb_sg_id]
   }
@@ -78,7 +86,7 @@ resource "aws_security_group" "ecs_clova_sg" {
 # ECS_SERVICE
 
 resource "aws_ecs_service" "ecs_service_clova" {
-  name            = "cloud-clova"
+  name            = local.clova_service_name
   cluster         = var.cluster_id
   task_definition = aws_ecs_task_definition.ecs_task_clova.arn
   desired_count   = 1
@@ -102,12 +110,12 @@ resource "aws_ecs_service" "ecs_service_clova" {
   }
 
   load_balancer {
-    target_group_arn = var.alb_tg_7005_arn
-    container_name   = "cloud-clova-svc"  # make sure that set same as container name
-    container_port   = 7005
+    target_group_arn = local.clova_lb_target_arn
+    container_name   = local.clova_service_name
+    container_port   = local.clova_container_port
   }
 
   depends_on = [
-    var.alb_tg_7005_arn
+    local.clova_lb_target_arn
   ]
 }

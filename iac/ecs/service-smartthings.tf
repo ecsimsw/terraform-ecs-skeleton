@@ -1,14 +1,15 @@
-# LOG_GROUP
-
-resource "aws_cloudwatch_log_group" "log_group_smartthings" {
-  name              = "/cloud/smartthings-svc"
-  retention_in_days = 1
+locals {
+  smartthings_service_name = "goqual-smartthings"
+  smartthings_service_version = "1.17.0"
+  smartthings_application_profile = "prod,remote-db,fusion, remote-redis"
+  smartthings_container_port = 7012
+  smartthings_lb_target_arn = var.alb_tg_7012_arn
 }
 
 # ECS_TASK
 
 resource "aws_ecs_task_definition" "ecs_task_smartthings" {
-  family             = "task-smartthings"
+  family             = "task-${local.smartthings_service_name}"
   execution_role_arn = var.ecs_task_execution_role
   network_mode       = "awsvpc"
   requires_compatibilities = ["FARGATE"]
@@ -17,15 +18,15 @@ resource "aws_ecs_task_definition" "ecs_task_smartthings" {
 
   container_definitions = jsonencode([
     {
-      name   = "cloud-smartthings-svc"
-      image  = "${var.ecr_url}:goqual-smartthings-1.17.0"
+      name   = local.smartthings_service_name
+      image  = "${var.ecr_url}:${local.smartthings_service_name}-${local.smartthings_service_version}"
       cpu    = 512
       memory = 1024
       essential = true # If the essential parameter of a container is marked as true, and that container fails or stops for any reason, all other containers that are part of the task are stopped
       portMappings = [
         {
-          containerPort = 7012
-          hostPort      = 7012
+          containerPort = local.smartthings_container_port
+          hostPort      = local.smartthings_container_port
           protocol      = "tcp"
         }
       ]
@@ -35,14 +36,14 @@ resource "aws_ecs_task_definition" "ecs_task_smartthings" {
         options = {
           awslogs-group         = aws_cloudwatch_log_group.log_group_smartthings.name
           awslogs-region        = "ap-northeast-2"
-          awslogs-stream-prefix = "smartthings"
+          awslogs-stream-prefix = "${local.smartthings_service_name}-${local.smartthings_service_version}"
         }
       }
 
       environment = [
         {
           name  = "SPRING_PROFILES_ACTIVE"
-          value = "prod,remote-db,remote-redis"
+          value = local.smartthings_application_profile
         }
       ]
     }
@@ -54,15 +55,22 @@ resource "aws_ecs_task_definition" "ecs_task_smartthings" {
   }
 }
 
+# LOG_GROUP
+
+resource "aws_cloudwatch_log_group" "log_group_smartthings" {
+  name              = "/cloud/${local.smartthings_service_name}"
+  retention_in_days = 1
+}
+
 # ECS_SG
 
 resource "aws_security_group" "ecs_smartthings_sg" {
-  name   = "sp-ecs-smartthings-sg"
+  name   = "sp-ecs-${local.smartthings_service_name}-sg"
   vpc_id = var.vpc_id
 
   ingress {
-    from_port       = 7012
-    to_port         = 7012
+    from_port       = local.smartthings_container_port
+    to_port         = local.smartthings_container_port
     protocol        = "tcp"
     security_groups = [var.internal_alb_sg_id]
   }
@@ -78,7 +86,7 @@ resource "aws_security_group" "ecs_smartthings_sg" {
 # ECS_SERVICE
 
 resource "aws_ecs_service" "ecs_service_smartthings" {
-  name            = "cloud-smartthings"
+  name            = local.smartthings_service_name
   cluster         = var.cluster_id
   task_definition = aws_ecs_task_definition.ecs_task_smartthings.arn
   desired_count   = 1
@@ -102,12 +110,12 @@ resource "aws_ecs_service" "ecs_service_smartthings" {
   }
 
   load_balancer {
-    target_group_arn = var.alb_tg_7012_arn
-    container_name   = "cloud-smartthings-svc"  # make sure that set same as container name
-    container_port   = 7012
+    target_group_arn = local.smartthings_lb_target_arn
+    container_name   = local.smartthings_service_name
+    container_port   = local.smartthings_container_port
   }
 
   depends_on = [
-    var.alb_tg_7012_arn
+    local.smartthings_lb_target_arn
   ]
 }

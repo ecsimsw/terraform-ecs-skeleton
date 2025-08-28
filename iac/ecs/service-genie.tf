@@ -1,14 +1,15 @@
-# LOG_GROUP
-
-resource "aws_cloudwatch_log_group" "log_group_genie" {
-  name              = "/cloud/genie-svc"
-  retention_in_days = 1
+locals {
+  genie_service_name = "goqual-genie"
+  genie_service_version = "1.9.10"
+  genie_application_profile = "prod"
+  genie_container_port = 7002
+  genie_lb_target_arn = var.alb_tg_7002_arn
 }
 
 # ECS_TASK
 
 resource "aws_ecs_task_definition" "ecs_task_genie" {
-  family             = "task-genie"
+  family             = "task-${local.genie_service_name}"
   execution_role_arn = var.ecs_task_execution_role
   network_mode       = "awsvpc"
   requires_compatibilities = ["FARGATE"]
@@ -17,15 +18,15 @@ resource "aws_ecs_task_definition" "ecs_task_genie" {
 
   container_definitions = jsonencode([
     {
-      name   = "cloud-genie-svc"
-      image  = "${var.ecr_url}:goqual-genie-1.9.8"
+      name   = local.genie_service_name
+      image  = "${var.ecr_url}:${local.genie_service_name}-${local.genie_service_version}"
       cpu    = 512
       memory = 1024
       essential = true # If the essential parameter of a container is marked as true, and that container fails or stops for any reason, all other containers that are part of the task are stopped
       portMappings = [
         {
-          containerPort = 7002
-          hostPort      = 7002
+          containerPort = local.genie_container_port
+          hostPort      = local.genie_container_port
           protocol      = "tcp"
         }
       ]
@@ -35,14 +36,14 @@ resource "aws_ecs_task_definition" "ecs_task_genie" {
         options = {
           awslogs-group         = aws_cloudwatch_log_group.log_group_genie.name
           awslogs-region        = "ap-northeast-2"
-          awslogs-stream-prefix = "genie"
+          awslogs-stream-prefix = "${local.genie_service_name}-${local.genie_service_version}"
         }
       }
 
       environment = [
         {
           name  = "SPRING_PROFILES_ACTIVE"
-          value = "prod,remote-db,remote-redis"
+          value = local.genie_application_profile
         }
       ]
     }
@@ -54,15 +55,22 @@ resource "aws_ecs_task_definition" "ecs_task_genie" {
   }
 }
 
+# LOG_GROUP
+
+resource "aws_cloudwatch_log_group" "log_group_genie" {
+  name              = "/cloud/${local.genie_service_name}"
+  retention_in_days = 1
+}
+
 # ECS_SG
 
 resource "aws_security_group" "ecs_genie_sg" {
-  name   = "sp-ecs-genie-sg"
+  name   = "sp-ecs-${local.genie_service_name}-sg"
   vpc_id = var.vpc_id
 
   ingress {
-    from_port       = 7002
-    to_port         = 7002
+    from_port       = local.genie_container_port
+    to_port         = local.genie_container_port
     protocol        = "tcp"
     security_groups = [var.internal_alb_sg_id]
   }
@@ -78,7 +86,7 @@ resource "aws_security_group" "ecs_genie_sg" {
 # ECS_SERVICE
 
 resource "aws_ecs_service" "ecs_service_genie" {
-  name            = "cloud-genie"
+  name            = local.genie_service_name
   cluster         = var.cluster_id
   task_definition = aws_ecs_task_definition.ecs_task_genie.arn
   desired_count   = 1
@@ -102,12 +110,12 @@ resource "aws_ecs_service" "ecs_service_genie" {
   }
 
   load_balancer {
-    target_group_arn = var.alb_tg_7002_arn
-    container_name   = "cloud-genie-svc"  # make sure that set same as container name
-    container_port   = 7002
+    target_group_arn = local.genie_lb_target_arn
+    container_name   = local.genie_service_name
+    container_port   = local.genie_container_port
   }
 
   depends_on = [
-    var.alb_tg_7002_arn
+    local.genie_lb_target_arn
   ]
 }

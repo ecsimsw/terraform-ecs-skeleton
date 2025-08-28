@@ -1,14 +1,15 @@
-# LOG_GROUP
-
-resource "aws_cloudwatch_log_group" "log_group_thinq" {
-  name              = "/cloud/thinq-svc"
-  retention_in_days = 1
+locals {
+  thinq_service_name = "goqual-thinq"
+  thinq_service_version = "2.0.3"
+  thinq_application_profile = "prod,remote-db,fusion, remote-redis"
+  thinq_container_port = 7040
+  thinq_lb_target_arn = var.alb_tg_7040_arn
 }
 
 # ECS_TASK
 
 resource "aws_ecs_task_definition" "ecs_task_thinq" {
-  family             = "task-thinq"
+  family             = "task-${local.thinq_service_name}"
   execution_role_arn = var.ecs_task_execution_role
   network_mode       = "awsvpc"
   requires_compatibilities = ["FARGATE"]
@@ -17,15 +18,15 @@ resource "aws_ecs_task_definition" "ecs_task_thinq" {
 
   container_definitions = jsonencode([
     {
-      name   = "cloud-thinq-svc"
-      image  = "${var.ecr_url}:goqual-thinq-2.0.3"
+      name   = local.thinq_service_name
+      image  = "${var.ecr_url}:${local.thinq_service_name}-${local.thinq_service_version}"
       cpu    = 512
       memory = 1024
       essential = true # If the essential parameter of a container is marked as true, and that container fails or stops for any reason, all other containers that are part of the task are stopped
       portMappings = [
         {
-          containerPort = 7040
-          hostPort      = 7040
+          containerPort = local.thinq_container_port
+          hostPort      = local.thinq_container_port
           protocol      = "tcp"
         }
       ]
@@ -35,14 +36,14 @@ resource "aws_ecs_task_definition" "ecs_task_thinq" {
         options = {
           awslogs-group         = aws_cloudwatch_log_group.log_group_thinq.name
           awslogs-region        = "ap-northeast-2"
-          awslogs-stream-prefix = "thinq"
+          awslogs-stream-prefix = local.thinq_service_name
         }
       }
 
       environment = [
         {
           name  = "SPRING_PROFILES_ACTIVE"
-          value = "prod,remote-db,remote-redis,dev"
+          value = "${local.thinq_application_profile}-${local.thinq_service_version}"
         }
       ]
     }
@@ -54,15 +55,22 @@ resource "aws_ecs_task_definition" "ecs_task_thinq" {
   }
 }
 
+# LOG_GROUP
+
+resource "aws_cloudwatch_log_group" "log_group_thinq" {
+  name              = "/cloud/${local.thinq_service_name}"
+  retention_in_days = 1
+}
+
 # ECS_SG
 
 resource "aws_security_group" "ecs_thinq_sg" {
-  name   = "sp-ecs-thinq-sg"
+  name   = "sp-ecs-${local.thinq_service_name}-sg"
   vpc_id = var.vpc_id
 
   ingress {
-    from_port       = 7040
-    to_port         = 7040
+    from_port       = local.thinq_container_port
+    to_port         = local.thinq_container_port
     protocol        = "tcp"
     security_groups = [var.internal_alb_sg_id]
   }
@@ -78,7 +86,7 @@ resource "aws_security_group" "ecs_thinq_sg" {
 # ECS_SERVICE
 
 resource "aws_ecs_service" "ecs_service_thinq" {
-  name            = "cloud-thinq"
+  name            = local.thinq_service_name
   cluster         = var.cluster_id
   task_definition = aws_ecs_task_definition.ecs_task_thinq.arn
   desired_count   = 1
@@ -102,12 +110,12 @@ resource "aws_ecs_service" "ecs_service_thinq" {
   }
 
   load_balancer {
-    target_group_arn = var.alb_tg_7040_arn
-    container_name   = "cloud-thinq-svc"  # make sure that set same as container name
-    container_port   = 7040
+    target_group_arn = local.thinq_lb_target_arn
+    container_name   = local.thinq_service_name
+    container_port   = local.thinq_container_port
   }
 
   depends_on = [
-    var.alb_tg_7040_arn
+    local.thinq_lb_target_arn
   ]
 }
