@@ -320,7 +320,7 @@ resource "aws_lb_target_group" "alb_tg_8006" {
     healthy_threshold   = 2
     unhealthy_threshold = 10
     timeout             = 5
-    path                = "/health"
+    path                = "/openapi/actuator"
     matcher             = "200"
   }
 
