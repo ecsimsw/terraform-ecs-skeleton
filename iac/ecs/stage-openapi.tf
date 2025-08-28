@@ -1,6 +1,6 @@
 locals {
   stage_openapi_service_name = "goqual-stage-openapi"
-  stage_openapi_service_version = "9.9.9"
+  stage_openapi_service_version = "9.9.6"
   stage_openapi_application_profile = "prod,remote-db,fusion,remote-redis"
   stage_openapi_lb_port = 8006
   stage_openapi_container_port = 7006
@@ -91,8 +91,10 @@ resource "aws_ecs_service" "ecs_service_stage_openapi" {
   task_definition = aws_ecs_task_definition.ecs_task_stage_openapi.arn
   desired_count   = 1
   launch_type     = null
-  health_check_grace_period_seconds = 120
+  health_check_grace_period_seconds = 10
   force_new_deployment = true
+  deployment_minimum_healthy_percent = 0
+  deployment_maximum_percent         = 100
 
   network_configuration {
     subnets          = var.private_subnet_ids

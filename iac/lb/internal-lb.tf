@@ -86,8 +86,8 @@ resource "aws_lb_target_group" "alb_tg_7002" {
 
   health_check {
     path                = "/genie/actuator"
-    interval            = 30
-    timeout             = 10
+    interval            = 10
+    timeout             = 5
     healthy_threshold   = 2
     unhealthy_threshold = 2
     matcher             = "200"
@@ -119,8 +119,8 @@ resource "aws_lb_target_group" "alb_tg_7004" {
 
   health_check {
     path                = "/kakao/actuator/health"
-    interval            = 30
-    timeout             = 10
+    interval            = 10
+    timeout             = 5
     healthy_threshold   = 2
     unhealthy_threshold = 2
     matcher             = "200"
@@ -152,8 +152,8 @@ resource "aws_lb_target_group" "alb_tg_7005" {
 
   health_check {
     path                = "/clova/actuator/"
-    interval            = 30
-    timeout             = 10
+    interval            = 10
+    timeout             = 5
     healthy_threshold   = 2
     unhealthy_threshold = 2
     matcher             = "200"
@@ -185,8 +185,8 @@ resource "aws_lb_target_group" "alb_tg_7006" {
 
   health_check {
     path                = "/openapi/actuator/"
-    interval            = 30
-    timeout             = 10
+    interval            = 10
+    timeout             = 5
     healthy_threshold   = 2
     unhealthy_threshold = 2
     matcher             = "200"
@@ -218,8 +218,8 @@ resource "aws_lb_target_group" "alb_tg_7012" {
 
   health_check {
     path                = "/smartthings/actuator/health"
-    interval            = 30
-    timeout             = 10
+    interval            = 10
+    timeout             = 5
     healthy_threshold   = 2
     unhealthy_threshold = 2
     matcher             = "200"
@@ -251,8 +251,8 @@ resource "aws_lb_target_group" "alb_tg_7013" {
 
   health_check {
     path                = "/actuator/health"
-    interval            = 30
-    timeout             = 10
+    interval            = 10
+    timeout             = 5
     healthy_threshold   = 2
     unhealthy_threshold = 2
     matcher             = "200"
@@ -284,8 +284,8 @@ resource "aws_lb_target_group" "alb_tg_7040" {
 
   health_check {
     path                = "/thinq/actuator/health"
-    interval            = 30
-    timeout             = 10
+    interval            = 10
+    timeout             = 5
     healthy_threshold   = 2
     unhealthy_threshold = 2
     matcher             = "200"
@@ -316,11 +316,11 @@ resource "aws_lb_target_group" "alb_tg_8006" {
   target_type = "ip"
 
   health_check {
-    path                = "/openapi/actuator"
-    interval            = 30
-    timeout             = 10
+    interval            = 10
     healthy_threshold   = 2
-    unhealthy_threshold = 2
+    unhealthy_threshold = 10
+    timeout             = 5
+    path                = "/health"
     matcher             = "200"
   }
 

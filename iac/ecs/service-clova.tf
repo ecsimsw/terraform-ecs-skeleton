@@ -91,7 +91,7 @@ resource "aws_ecs_service" "ecs_service_clova" {
   task_definition = aws_ecs_task_definition.ecs_task_clova.arn
   desired_count   = 1
   launch_type     = null
-  health_check_grace_period_seconds = 120
+  health_check_grace_period_seconds = 20
   force_new_deployment = true
 
   network_configuration {
