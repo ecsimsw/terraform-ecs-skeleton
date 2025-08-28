@@ -52,8 +52,8 @@ resource "aws_security_group" "internal_alb_sg" {
   }
 
   ingress {
-    from_port   = 8080
-    to_port     = 8080
+    from_port   = 8006
+    to_port     = 8006
     protocol    = "tcp"
     cidr_blocks = var.internal_lb_cidr_block
   }
@@ -303,5 +303,38 @@ resource "aws_lb_listener" "internal_alb_listener_7040" {
   default_action {
     type = "forward"
     target_group_arn = aws_lb_target_group.alb_tg_7040.arn
+  }
+}
+
+## 8006
+
+resource "aws_lb_target_group" "alb_tg_8006" {
+  name        = "cloud-8006-${substr(uuid(), 0, 3)}"
+  port        = 8006
+  protocol    = "HTTP"
+  vpc_id      = var.vpc_id
+  target_type = "ip"
+
+  health_check {
+    path                = "/openapi/actuator"
+    interval            = 30
+    timeout             = 10
+    healthy_threshold   = 2
+    unhealthy_threshold = 2
+    matcher             = "200"
+  }
+
+  lifecycle {
+    ignore_changes = [name]
+  }
+}
+
+resource "aws_lb_listener" "internal_alb_listener_8006" {
+  load_balancer_arn = aws_lb.internal_alb.arn
+  port              = 8006
+  protocol          = "HTTP"
+  default_action {
+    type = "forward"
+    target_group_arn = aws_lb_target_group.alb_tg_8006.arn
   }
 }

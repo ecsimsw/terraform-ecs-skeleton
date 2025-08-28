@@ -53,3 +53,7 @@ variable "alb_tg_7013_arn" {
 variable "alb_tg_7040_arn" {
   type = string
 }
+
+variable "alb_tg_8006_arn" {
+  type = string
+}

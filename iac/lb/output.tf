@@ -33,3 +33,7 @@ output "internal_alb_tg_7013_arn" {
 output "internal_alb_tg_7040_arn" {
   value = aws_lb_target_group.alb_tg_7040.arn
 }
+
+output "internal_alb_tg_8006_arn" {
+  value = aws_lb_target_group.alb_tg_8006.arn
+}

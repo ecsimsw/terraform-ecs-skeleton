@@ -193,3 +193,30 @@ resource "aws_lb_target_group_attachment" "attach_alb_7040" {
   target_id        = aws_lb.internal_alb.arn
   port             = 7040
 }
+
+## 8006
+
+resource "aws_lb_target_group" "external_nlb_tg_8006" {
+  name        = "nlb-to-alb-tg-8006"
+  target_type = "alb"
+  port        = 8006
+  protocol    = "TCP"
+  vpc_id      = var.vpc_id
+}
+
+resource "aws_lb_listener" "external_nlb_listener_8006" {
+  load_balancer_arn = aws_lb.external_nlb.arn
+  port              = 8006
+  protocol          = "TCP"
+
+  default_action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.external_nlb_tg_8006.arn
+  }
+}
+
+resource "aws_lb_target_group_attachment" "attach_alb_8006" {
+  target_group_arn = aws_lb_target_group.external_nlb_tg_8006.arn
+  target_id        = aws_lb.internal_alb.arn
+  port             = 8006
+}
