@@ -1,9 +1,9 @@
 locals {
   clova_service_name = "goqual-clova"
-  clova_service_version = "1.16.1"
+  clova_service_version = "1.16.4"
   clova_service_profile = "prod,remote-db,remote-redis"
-  clova_container_port = 7004
-  clova_lb_target_arn = var.alb_tg_7004_arn
+  clova_container_port = 7005
+  clova_lb_target_arn = var.alb_tg_7005_arn
 }
 
 # ECS_TASK

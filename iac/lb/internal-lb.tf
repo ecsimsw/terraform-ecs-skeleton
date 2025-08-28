@@ -85,7 +85,7 @@ resource "aws_lb_target_group" "alb_tg_7002" {
   target_type = "ip"
 
   health_check {
-    path                = "/genie/actuator/health"
+    path                = "/genie/actuator"
     interval            = 30
     timeout             = 10
     healthy_threshold   = 2

@@ -1,6 +1,6 @@
 locals {
   thinq_service_name = "goqual-thinq"
-  thinq_service_version = "2.0.3"
+  thinq_service_version = "2.0.6"
   thinq_application_profile = "prod,remote-db,fusion, remote-redis"
   thinq_container_port = 7040
   thinq_lb_target_arn = var.alb_tg_7040_arn
@@ -36,7 +36,7 @@ resource "aws_ecs_task_definition" "ecs_task_thinq" {
         options = {
           awslogs-group         = aws_cloudwatch_log_group.log_group_thinq.name
           awslogs-region        = "ap-northeast-2"
-          awslogs-stream-prefix = local.thinq_service_name
+          awslogs-stream-prefix = "${local.thinq_service_name}-${local.thinq_service_version}"
         }
       }
 

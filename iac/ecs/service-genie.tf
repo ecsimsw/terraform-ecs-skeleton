@@ -1,6 +1,6 @@
 locals {
   genie_service_name = "goqual-genie"
-  genie_service_version = "1.9.10"
+  genie_service_version = "1.9.11"
   genie_application_profile = "prod"
   genie_container_port = 7002
   genie_lb_target_arn = var.alb_tg_7002_arn
