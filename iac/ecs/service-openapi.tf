@@ -1,14 +1,14 @@
 # LOG_GROUP
 
-resource "aws_cloudwatch_log_group" "log_group_genie" {
-  name              = "/cloud/genie-svc"
+resource "aws_cloudwatch_log_group" "log_group_openapi" {
+  name              = "/cloud/openapi-svc"
   retention_in_days = 1
 }
 
 # ECS_TASK
 
-resource "aws_ecs_task_definition" "ecs_task_genie" {
-  family             = "task-genie"
+resource "aws_ecs_task_definition" "ecs_task_openapi" {
+  family             = "task-openapi"
   execution_role_arn = var.ecs_task_execution_role
   network_mode       = "awsvpc"
   requires_compatibilities = ["FARGATE"]
@@ -17,15 +17,15 @@ resource "aws_ecs_task_definition" "ecs_task_genie" {
 
   container_definitions = jsonencode([
     {
-      name   = "cloud-genie-svc"
-      image  = "${var.ecr_url}:goqual-genie-1.9.8"
+      name   = "cloud-openapi-svc"
+      image  = "${var.ecr_url}:goqual-openapi-1.16.2"
       cpu    = 512
       memory = 1024
       essential = true # If the essential parameter of a container is marked as true, and that container fails or stops for any reason, all other containers that are part of the task are stopped
       portMappings = [
         {
-          containerPort = 7002
-          hostPort      = 7002
+          containerPort = 7006
+          hostPort      = 7006
           protocol      = "tcp"
         }
       ]
@@ -33,16 +33,16 @@ resource "aws_ecs_task_definition" "ecs_task_genie" {
       logConfiguration = {
         logDriver = "awslogs"
         options = {
-          awslogs-group         = aws_cloudwatch_log_group.log_group_genie.name
+          awslogs-group         = aws_cloudwatch_log_group.log_group_openapi.name
           awslogs-region        = "ap-northeast-2"
-          awslogs-stream-prefix = "genie"
+          awslogs-stream-prefix = "openapi"
         }
       }
 
       environment = [
         {
           name  = "SPRING_PROFILES_ACTIVE"
-          value = "prod,remote-db,remote-redis"
+          value = "prod,remote-db,remote-redis,fusion"
         }
       ]
     }
@@ -56,13 +56,13 @@ resource "aws_ecs_task_definition" "ecs_task_genie" {
 
 # ECS_SG
 
-resource "aws_security_group" "ecs_genie_sg" {
-  name   = "sp-ecs-genie-sg"
+resource "aws_security_group" "ecs_openapi_sg" {
+  name   = "sp-ecs-openapi-sg"
   vpc_id = var.vpc_id
 
   ingress {
-    from_port       = 7002
-    to_port         = 7002
+    from_port       = 7006
+    to_port         = 7006
     protocol        = "tcp"
     security_groups = [var.internal_alb_sg_id]
   }
@@ -77,10 +77,10 @@ resource "aws_security_group" "ecs_genie_sg" {
 
 # ECS_SERVICE
 
-resource "aws_ecs_service" "ecs_service_genie" {
-  name            = "cloud-genie"
+resource "aws_ecs_service" "ecs_service_openapi" {
+  name            = "cloud-openapi"
   cluster         = var.cluster_id
-  task_definition = aws_ecs_task_definition.ecs_task_genie.arn
+  task_definition = aws_ecs_task_definition.ecs_task_openapi.arn
   desired_count   = 1
   launch_type     = null
   health_check_grace_period_seconds = 120
@@ -90,7 +90,7 @@ resource "aws_ecs_service" "ecs_service_genie" {
     subnets          = var.private_subnet_ids
     security_groups = [
       var.ecs_security_group_id,
-      aws_security_group.ecs_genie_sg.id
+      aws_security_group.ecs_openapi_sg.id
     ]
     assign_public_ip = false
   }
@@ -102,12 +102,12 @@ resource "aws_ecs_service" "ecs_service_genie" {
   }
 
   load_balancer {
-    target_group_arn = var.alb_tg_7002_arn
-    container_name   = "cloud-genie-svc"  # make sure that set same as container name
-    container_port   = 7002
+    target_group_arn = var.alb_tg_7006_arn
+    container_name   = "cloud-openapi-svc"  # make sure that set same as container name
+    container_port   = 7006
   }
 
   depends_on = [
-    var.alb_tg_7002_arn
+    var.alb_tg_7006_arn
   ]
 }

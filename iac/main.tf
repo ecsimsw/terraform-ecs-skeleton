@@ -32,7 +32,10 @@ module "ecs" {
   alb_tg_7002_arn         = module.lb.internal_alb_tg_7002_arn
   alb_tg_7004_arn         = module.lb.internal_alb_tg_7004_arn
   alb_tg_7005_arn         = module.lb.internal_alb_tg_7005_arn
+  alb_tg_7006_arn         = module.lb.internal_alb_tg_7006_arn
+  alb_tg_7012_arn         = module.lb.internal_alb_tg_7012_arn
   alb_tg_7013_arn         = module.lb.internal_alb_tg_7013_arn
+  alb_tg_7040_arn         = module.lb.internal_alb_tg_7040_arn
   private_subnet_ids      = module.vpc.private_subnet_ids
   cluster_id              = module.ecs.cluster_id
   ecr_url                 = module.ecr.ecr_url

@@ -38,6 +38,18 @@ variable "alb_tg_7005_arn" {
   type = string
 }
 
+variable "alb_tg_7006_arn" {
+  type = string
+}
+
+variable "alb_tg_7012_arn" {
+  type = string
+}
+
 variable "alb_tg_7013_arn" {
+  type = string
+}
+
+variable "alb_tg_7040_arn" {
   type = string
 }
