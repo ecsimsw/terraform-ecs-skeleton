@@ -91,7 +91,7 @@ resource "aws_ecs_service" "ecs_service_stage_openapi" {
   task_definition = aws_ecs_task_definition.ecs_task_stage_openapi.arn
   desired_count   = 1
   launch_type     = null
-  health_check_grace_period_seconds = 10
+  health_check_grace_period_seconds = 100
   force_new_deployment = true
   deployment_minimum_healthy_percent = 0
   deployment_maximum_percent         = 100

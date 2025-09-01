@@ -91,7 +91,7 @@ resource "aws_ecs_service" "ecs_service_genie" {
   task_definition = aws_ecs_task_definition.ecs_task_genie.arn
   desired_count   = 1
   launch_type     = null
-  health_check_grace_period_seconds = 20
+  health_check_grace_period_seconds = 100
   force_new_deployment = true
 
   network_configuration {
