@@ -1,6 +1,6 @@
 locals {
   stage_openapi_service_name = "goqual-stage-openapi"
-  stage_openapi_service_version = "9.9.6"
+  stage_openapi_service_version = "9.9.12"
   stage_openapi_application_profile = "prod,remote-db,fusion,remote-redis"
   stage_openapi_lb_port = 8006
   stage_openapi_container_port = 7006
@@ -14,15 +14,15 @@ resource "aws_ecs_task_definition" "ecs_task_stage_openapi" {
   execution_role_arn = var.ecs_task_execution_role
   network_mode       = "awsvpc"
   requires_compatibilities = ["FARGATE"]
-  cpu                = 512
-  memory             = 1024
+  cpu                = 1024
+  memory             = 2048
 
   container_definitions = jsonencode([
     {
       name   = local.stage_openapi_service_name
       image  = "${var.ecr_url}:goqual-openapi-${local.stage_openapi_service_version}"
-      cpu    = 512
-      memory = 1024
+      cpu    = 1024
+      memory = 2048
       essential = true # If the essential parameter of a container is marked as true, and that container fails or stops for any reason, all other containers that are part of the task are stopped
       portMappings = [
         {

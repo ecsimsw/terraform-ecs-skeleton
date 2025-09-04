@@ -89,7 +89,7 @@ resource "aws_lb_target_group" "alb_tg_7002" {
     interval            = 10
     timeout             = 5
     healthy_threshold   = 2
-    unhealthy_threshold = 2
+    unhealthy_threshold = 10
     matcher             = "200"
   }
 
@@ -122,7 +122,7 @@ resource "aws_lb_target_group" "alb_tg_7004" {
     interval            = 10
     timeout             = 5
     healthy_threshold   = 2
-    unhealthy_threshold = 2
+    unhealthy_threshold = 10
     matcher             = "200"
   }
 
@@ -155,7 +155,7 @@ resource "aws_lb_target_group" "alb_tg_7005" {
     interval            = 10
     timeout             = 5
     healthy_threshold   = 2
-    unhealthy_threshold = 2
+    unhealthy_threshold = 10
     matcher             = "200"
   }
 
@@ -188,7 +188,7 @@ resource "aws_lb_target_group" "alb_tg_7006" {
     interval            = 10
     timeout             = 5
     healthy_threshold   = 2
-    unhealthy_threshold = 2
+    unhealthy_threshold = 10
     matcher             = "200"
   }
 
@@ -221,7 +221,7 @@ resource "aws_lb_target_group" "alb_tg_7012" {
     interval            = 10
     timeout             = 5
     healthy_threshold   = 2
-    unhealthy_threshold = 2
+    unhealthy_threshold = 10
     matcher             = "200"
   }
 
@@ -254,7 +254,7 @@ resource "aws_lb_target_group" "alb_tg_7013" {
     interval            = 10
     timeout             = 5
     healthy_threshold   = 2
-    unhealthy_threshold = 2
+    unhealthy_threshold = 10
     matcher             = "200"
   }
 
@@ -287,7 +287,7 @@ resource "aws_lb_target_group" "alb_tg_7040" {
     interval            = 10
     timeout             = 5
     healthy_threshold   = 2
-    unhealthy_threshold = 2
+    unhealthy_threshold = 10
     matcher             = "200"
   }
 
